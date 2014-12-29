@@ -126,6 +126,10 @@ def interpret_expr(expr, env)
         case expr[2]
           when :toString
             return obj.to_s
+          when :toInteger
+            return obj.to_i
+          when :toFloat
+            return obj.to_f
         end
       end
     when :CLASSFIELD
@@ -285,18 +289,6 @@ def interpret_expr(expr, env)
         else
           exit
         end
-      elsif expr[1] == :toString
-        if expr[2].length != 1
-          raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")
-        end
-        # this doesn't work well with CnObjects, CnFunctions and CnClasses.
-        obj = interpret_expr(expr[2][0], env)
-        return obj.to_s
-      elsif expr[1] == :toInteger
-        if expr[2].length != 1
-          raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")
-        end
-        return interpret_expr(expr[2][0], env).to_i
       elsif expr[1] == :isInstanceOf
         if expr[2].length != 2
           raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")

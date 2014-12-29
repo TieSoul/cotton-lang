@@ -1,0 +1,12 @@
+class Something {
+    fn init() {
+        this.someValue = 5;
+    }
+
+    op fn +(other) {
+        return this.someValue + other;
+    }
+}
+
+x = Something();
+println(x + 3); // -> 8

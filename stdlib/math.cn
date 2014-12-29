@@ -1,0 +1,66 @@
+class Math {
+    PI  = 3.14159265359;
+    E   = 2.71828182845;
+    PHI = 1.61803398875;
+    fn abs(x) {
+        if x < 0 {
+            return -x;
+        }
+        return x;
+    }
+    fn exp(x) {
+        return this.E ** x;
+    }
+    fn factorial(x) {
+        i = x;
+        result = 1;
+        while i > 0 {
+            result *= i;
+            i -= 1;
+        }
+        return result;
+    }
+    fn sin(x) {
+        x %= 2 * this.PI;
+        inv = 1;
+        if x > this.PI {
+            inv = -1;
+        }
+        x %= this.PI;
+        if x > this.PI / 2 {
+            x = this.PI - x;
+        }
+        result = x;
+        i = 3;
+        neg = -1;
+        while i < 20 {
+            result += neg * ((x ** i) / (this.factorial(i)));
+            i += 2;
+            neg = -neg;
+        }
+        return result * inv;
+    }
+    fn cos(x) {
+        x %= 2 * this.PI;
+        inv = 1;
+        if (x > this.PI / 2) & (x < this.PI * 1.5) {
+            inv = -1;
+        }
+        x %= this.PI;
+        if x > this.PI / 2 {
+            x = this.PI - x;
+        }
+        result = 1;
+        i = 2;
+        neg = -1;
+        while i < 20 {
+            result += neg * ((x ** i) / (this.factorial(i)));
+            i += 2;
+            neg = -neg;
+        }
+        return result * inv;
+    }
+    fn tan(x) {
+        return this.sin(x) / this.cos(x);
+    }
+}

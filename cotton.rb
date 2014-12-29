@@ -109,6 +109,7 @@ def interpret_expr(expr, env)
       obj = interpret_expr(expr[1], env)
       if obj.is_a? CnObject or obj.is_a? CnClass
         fun = obj.functions[expr[2]]
+        raise FunctionNotFoundException.new("Function #{expr[2]} not found.") if fun.nil?
         env << {}
         fun.parameters.each_index do |i|
           env[-1][fun.parameters[i]] = interpret_expr(expr[3][i], env)
@@ -122,22 +123,16 @@ def interpret_expr(expr, env)
         end
         env.pop
         return returnvalue
-      else
-        case expr[2]
-          when :toString
-            return obj.to_s
-          when :toInteger
-            return obj.to_i
-          when :toFloat
-            return obj.to_f
-        end
       end
+      raise StandardError.new("Primitives are not objects.")
     when :CLASSFIELD
       obj = interpret_expr(expr[1], env)
       if obj.is_a? CnObject
         return obj.fields[expr[2]] || obj.constants[expr[2]]
       elsif obj.is_a? CnClass
         return obj.fields[expr[2]]
+      else
+        raise StandardError.new("Primitives are not objects.")
       end
     when :CLASSASSIGN
       obj = interpret_expr(expr[1], env)
@@ -289,6 +284,23 @@ def interpret_expr(expr, env)
         else
           exit
         end
+      elsif expr[1] == :toString
+        if expr[2].length != 1
+          raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")
+        end
+        # this doesn't work well with CnObjects, CnFunctions and CnClasses.
+        obj = interpret_expr(expr[2][0], env)
+        return obj.to_s
+      elsif expr[1] == :toInteger
+        if expr[2].length != 1
+          raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")
+        end
+        return interpret_expr(expr[2][0], env).to_i
+      elsif expr[1] == :toFloat
+        if expr[2].length != 1
+          raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")
+        end
+        return interpret_expr(expr[2][0], env).to_f
       elsif expr[1] == :isInstanceOf
         if expr[2].length != 2
           raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")
@@ -320,6 +332,24 @@ def interpret_expr(expr, env)
           raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")
         end
         return interpret_expr(expr[2][0], env).is_a? Array
+      elsif expr[1] == :ord
+        obj = interpret_expr(expr[2][0], env)
+        if expr[2].length != 1
+          raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")
+        end
+        unless obj.is_a? String and obj.length == 1
+          raise StandardError.new("Function #{expr[1].to_s} called with inappropriate argument #{obj.inspect}.")
+        end
+        return obj.ord
+      elsif expr[1] == :chr
+        obj = interpret_expr(expr[2][0], env)
+        if expr[2].length != 1
+          raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")
+        end
+        unless obj.is_a? Integer
+          raise StandardError.new("Function #{expr[1].to_s} called with inappropriate argument #{obj.inspect}.")
+        end
+        return obj.chr
       end
       raise FunctionNotFoundException.new("Function #{expr[1].to_s} not found.")
   end

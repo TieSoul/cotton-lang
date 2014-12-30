@@ -1,8 +1,12 @@
 class Math {
-    PI  = 3.14159265359;
-    E   = 2.71828182845;
-    PHI = 1.61803398875;
-    fn abs(x) {
+	// standard math library
+	//
+	// have some constants
+    PI  = 3.14159265358979323846264338327950288419716939937511;
+    E   = 2.71828182845904523536028747135266249775724709369995;
+    PHI = 1.61803398874989484820458683436563811772030917980576;
+    // have some functions
+	fn abs(x) {
         if x < 0 {
             return -x;
         }
@@ -11,6 +15,7 @@ class Math {
     fn exp(x) {
         return this.E ** x;
     }
+	// you know, I never see a factorial function in standard math libraries...
     fn factorial(x) {
         i = x;
         result = 1;
@@ -20,6 +25,9 @@ class Math {
         }
         return result;
     }
+	// trigonometric functions. Yay taylor series!
+	// also sorry about no inverse trigonometric functions.
+	// taylor series were too inaccurate and, frankly, I don't understand the other methods.
     fn sin(x) {
         x %= 2 * this.PI;
         inv = 1;
@@ -63,4 +71,77 @@ class Math {
     fn tan(x) {
         return this.sin(x) / this.cos(x);
     }
+    fn csc(x) {
+        return 1 / this.sin(x);
+    }
+    fn sec(x) {
+        return 1 / this.cos(x);
+    }
+    fn cot(x) {
+        return 1 / this.tan(x);
+    }
+	
+	fn sqrt(x) {
+		return x ** 0.5;
+	}
+	fn cbrt(x) {
+		return x ** (1.0 / 3.0);
+	}
+	fn round(x, digits) {
+		x = toInteger(x * 10 ** (digits+1));
+		if x % 10 >= 5 {
+			x += 10;
+		}
+		x -= x % 10;
+		return x / 10.0 ** (digits+1);
+	}
+	
+	fn ln(x) {
+		if x < 0 {
+			return 0.0/0.0;
+		} elsif x == 0 {
+			return -1.0 / 0.0;
+		}
+		x = toFloat(x);
+		mod = 0;
+		while x >= 10 {
+			mod += 2.3025850929940455;
+			x /= 10;
+		}
+		while x < 1 {
+			mod -= 2.3025850929940455;
+			x *= 10;
+		}
+		i = 0.0;
+		result = 0.0;
+		while i < 100 {
+			result += (1/(2*i+1)) * (((x - 1) / (x + 1)) ** (2 * i + 1));
+			i += 1;
+		}
+		return 2*result + mod;
+	}
+	fn log10(x) {
+		return this.ln(x) / this.ln(10);
+	}
+	fn log2(x) {
+		return this.ln(x) / this.ln(2);
+	}
+	fn logbase(base, x) {
+		return this.ln(x) / this.ln(base);
+	}
+	
+	// saw this in Ruby's math module.
+	fn frexp(x) {
+		if x == 0 {
+			return [0.0, 0];
+		}
+		inv = 1;
+		if x < 0 {
+			inv = -1;
+		}
+		l = this.ln(this.abs(x)) / this.ln(2);
+		exp = toInteger(l) + 1;
+		sig = 2 ** (l - exp);
+		return [inv * sig, exp];
+	}
 }

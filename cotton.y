@@ -30,7 +30,7 @@ rule
             | T { result = nil }
 
     operator : OP | ADDOP | MULTOP | POW | EQ | OP '@' {result=val[0]+'@'} | ADDOP '@' {result=val[0]+'@'} | MULTOP '@' {result=val[0]+'@'} | POW '@' {result=val[0]+'@'} | EQ '@' { result = val[0] + '@' }
-             | '[' ']' {result = "[]" }
+             | '[' ']' {result = "[]" } | '[' ']' ASSIGNMENT {raise SyntaxError if val[2] != ''; result = '[]='}
 
     else : ELSE '{' stmtblock '}' { result = val[2] }
          | ELSIF expression '{' stmtblock '}' else { result = [[:IFELSE, val[1], val[3], val[5]]] }
@@ -61,6 +61,7 @@ rule
         | TRUE { result = [:BOOL, val[0]] }
         | FALSE { result = [:BOOL, val[0]] }
         | array { result = [:ARRAY, val[0]] }
+        | expression '[' expression ']' ASSIGNMENT expression { result = [:INDEXASSIGN, val[0], val[2], val[4], val[5]] }
         | expression '[' expression ']' { result = [:INDEX, val[0], val[2]] }
         | NIL { result = [:NIL, nil] }
 

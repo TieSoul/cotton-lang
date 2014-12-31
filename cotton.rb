@@ -167,6 +167,35 @@ def interpret_expr(expr, env)
       else
         return obj[index]
       end
+    when :INDEXASSIGN
+      obj = interpret_expr expr[1], env
+      index = interpret_expr expr[2], env
+      val = interpret_expr expr[4], env
+      if expr[3] != ''
+        return interpret_expr([:INDEXASSIGN, expr[1], expr[2], '', [:BINOP, expr[3], [:INDEX, expr[1], expr[2]], expr[4]]], env)
+      end
+      if obj.is_a? CnObject
+        if obj.operators.has_key? '[]='
+          fun = obj.operators['[]=']
+          if fun.parameters.length != 2
+            raise StandardError.new("Index function of class #{obj.classname} does not have two parameters.")
+          end
+          env << {this: obj}
+          env[-1][fun.parameters[0]] = index
+          env[-1][fun.parameters[1]] = val
+          returnvalue = nil
+          begin
+            interpret_stmts(fun.body, env)
+          rescue ReturnException => e
+            returnvalue = e.value
+          end
+          env.pop
+          return returnvalue
+        end
+        raise FunctionNotFoundException.new("Index function of class #{obj.classname} does not exist.")
+      else
+        return obj[index] = val
+      end
     when :BINOP
       obj = interpret_expr expr[2], env
       arg = interpret_expr expr[3], env
@@ -364,7 +393,7 @@ else
     begin
       x = interpret_stmts(parse(gets.chomp), env)
       puts (x.is_a? Array) ? x.inspect : x
-    rescue => e
+    rescue StandardError, SyntaxError => e
       $stderr.puts("Error: #{e.message.delete("\n")}")
     end
     $stderr.flush

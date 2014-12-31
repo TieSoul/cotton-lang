@@ -126,7 +126,7 @@ class Cotton < Racc::Parser
       when (text = @ss.scan(/0b[0-1]+/))
          action {[:INTEGER, text.to_i(2)]}
 
-      when (text = @ss.scan(/0o[0-8]+/))
+      when (text = @ss.scan(/0o[0-7]+/))
          action {[:INTEGER, text.to_i(8)]}
 
       when (text = @ss.scan(/[0-9]*(\.[0-9]+(e\-?[0-9]+)?)/))

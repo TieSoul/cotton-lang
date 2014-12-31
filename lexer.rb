@@ -120,7 +120,7 @@ class Cotton < Racc::Parser
       when (text = @ss.scan(/[+\-*\/%&|^\\!]{,2}=/))
          action {[:ASSIGNMENT, text[0...-1]]}
 
-      when (text = @ss.scan(/0x[0-9a-f]+/))
+      when (text = @ss.scan(/0x[0-9a-fA-F]+/))
          action {[:INTEGER, text.to_i(16)]}
 
       when (text = @ss.scan(/0b[0-1]+/))

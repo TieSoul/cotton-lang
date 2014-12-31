@@ -24,7 +24,7 @@ rule
   [<>=!]= {[:EQ, text]}
   [<>] {[:EQ, text]}
   [+\-*\/%&|^\\!]{,2}= {[:ASSIGNMENT, text[0...-1]]}
-  0x[0-9a-f]+ {[:INTEGER, text.to_i(16)]}
+  0x[0-9a-fA-F]+ {[:INTEGER, text.to_i(16)]}
   0b[0-1]+ {[:INTEGER, text.to_i(2)]}
   0o[0-8]+ {[:INTEGER, text.to_i(8)]}
   [0-9]*(\.[0-9]+(e\-?[0-9]+)?) {[:FLOAT, text.to_f]}

@@ -392,7 +392,7 @@ else
     print '> '
     begin
       x = interpret_stmts(parse(gets.chomp), env)
-      puts (x.is_a? Array) ? x.inspect : x
+      puts (x.is_a? Array) ? x.map {|x| (x.is_a? Array) ? x.inspect : x} : x
     rescue StandardError, SyntaxError => e
       $stderr.puts("Error: #{e.message.delete("\n")}")
     end

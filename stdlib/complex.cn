@@ -1,0 +1,68 @@
+include 'math';
+class Complex {
+	fn init(real, imag) {
+		this.real = toFloat(real);
+		this.imag = toFloat(imag);
+	}
+	op fn +(other) {
+		if !isInstanceOf(other, Complex) {
+			other = Complex(other, 0);
+		}
+		return Complex(this.real + other.real, this.imag + other.imag);
+	}
+	op fn -(other) {
+		return this + -other;
+	}
+	op fn *(other) {
+		if !isInstanceOf(other, Complex) {
+			other = Complex(other, 0);
+		}
+		return Complex(this.real * other.real - this.imag * other.imag, this.real * other.imag + this.imag * other.real);
+	}
+	op fn /(other) {
+		if !isInstanceOf(other, Complex) {
+			other = Complex(other, 0);
+		}
+		return Complex((this.real * other.real + this.imag * other.imag)/(other.real ** 2 + other.imag ** 2),
+					   (this.imag * other.real - this.real * other.imag)/(other.real ** 2 + other.imag ** 2));
+	}
+	op fn ==(other) {
+		if !isInstanceOf(other, Complex) {
+			other = Complex(other, 0);
+		}
+		return (this.real == other.real) & (this.imag == other.imag);
+	}
+	op fn !=(other) {
+		return !(this == other);
+	}
+	op fn -@() {
+		return Complex(-this.real, -this.imag);
+	}
+	op fn +@() {
+		return this;
+	}
+	fn mod() {
+		return Math.sqrt(this.real ** 2 + this.imag ** 2);
+	}
+	fn abs() {
+		return this.mod();
+	}
+	fn conj() {
+		return Complex(this.real, -this.imag);
+	}
+	fn toString() {
+		if (this.real != 0) & (this.imag != 0) {
+			str = "";
+			str += toString(this.real);
+			if (this.imag < 0) { str += " - "; } else { str += " + "; }
+			str += toString(Math.abs(this.imag)) + "i";
+		} elsif this.real != 0 {
+			str = toString(this.real);
+		} elsif this.imag != 0 {
+			str = toString(this.imag) + "i";
+		} else {
+			str = "0";
+		}
+		return str;
+	}
+}

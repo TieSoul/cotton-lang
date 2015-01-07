@@ -1,0 +1,73 @@
+fn sort(arr) {
+    newarr = [];
+    for i in arr { newarr += [i]; }
+	done = false;
+	while !done {
+		i = 0;
+		done = true;
+		while i < length(newarr) - 1 {
+			if newarr[i] > newarr[i+1] {
+				tmp = newarr[i];
+				newarr[i] = newarr[i+1];
+				newarr[i+1] = tmp;
+				done = false;
+			}
+			i += 1;
+		}
+	}
+	return newarr;
+}
+
+class Set {
+	fn init(arr) {
+		this.arr = [];
+		for i in arr {
+			if !(i in this.arr) {
+				this.arr += [i];
+			}
+		}
+	}
+	
+	fn contains(other) {
+		return other in this.arr;
+	}
+	
+	fn IN(x) {
+		return contains(other);
+	}
+	
+	op fn |(other) {
+		return Set(this.arr + other.arr);
+	}
+	
+	op fn +(other) {
+		return this & other;
+	}
+	
+	op fn &(other) {
+		arr = [];
+		for i in this.arr {
+			if i in other.arr {
+				arr += [i];
+			}
+		}
+		return Set(arr);
+	}
+	
+	op fn *(other) {
+		return this & other;
+	}
+	
+	op fn ==(other) {
+		return sort(this.arr) == sort(other.arr);
+	}
+	
+	op fn !=(other) {
+		return !(this == other);
+	}
+	
+	fn toString() {
+		return toString(sort(this.arr));
+	}
+	
+}

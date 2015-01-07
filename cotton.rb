@@ -68,6 +68,13 @@ def interpret_stmt(stmt, env)
         interpret_stmts(stmt[2], env)
         expr = interpret_expr(stmt[1], env)
       end
+    when :FORIN
+      arr = interpret_expr(stmt[2], env)
+      arr.each do |x|
+        env << {stmt[1] => x}
+        interpret_stmts(stmt[3], env)
+        env.pop
+      end
     when :CLASS
       env[-1][stmt[1]] = CnClass.new(stmt[1].to_s, stmt[2], env)
       return env[-1][stmt[1]]
@@ -105,6 +112,25 @@ def interpret_expr(expr, env)
       return unescape(expr[1])
     when :ARRAY
       return expr[1].map {|x| interpret_expr(x, env)}
+    when :IN
+      obj = interpret_expr(expr[2], env)
+      if obj.is_a? Array or obj.is_a? String
+        return obj.include? interpret_expr(expr[1], env)
+      elsif obj.is_a? CnObject and obj.functions.keys.include? :IN
+        fun = obj.functions[:IN]
+        env << {}
+        env[-1][:this] = obj
+        env[-1][fun.parameters[0]] = interpret_expr(expr[1], env)
+        returnvalue = nil
+        begin
+          interpret_stmts(fun.body, env)
+        rescue ReturnException => e
+          returnvalue = e.value
+        end
+        env.pop
+        return returnvalue
+      end
+      raise StandardError
     when :CLASSFUNCALL
       obj = interpret_expr(expr[1], env)
       if obj.is_a? CnObject or obj.is_a? CnClass
@@ -246,9 +272,23 @@ def interpret_expr(expr, env)
       end
     when :ASSIGNMENT
       if expr[2] == ''
-        env[-1][expr[1]] = interpret_expr(expr[3], env)
+        i = -1
+        env.reverse_each do |x|
+          if x.keys.include? expr[1]
+            i = env.rindex(x)
+            break
+          end
+        end
+        env[i][expr[1]] = interpret_expr(expr[3], env)
       else
-        env[-1][expr[1]] = interpret_expr([:BINOP, expr[2], [:IDENTIFIER, expr[1]], expr[3]], env)
+        i = -1
+        env.reverse_each do |x|
+          if x.keys.include? expr[1]
+            i = env.rindex(x)
+            break
+          end
+        end
+        env[i][expr[1]] = interpret_expr([:BINOP, expr[2], [:IDENTIFIER, expr[1]], expr[3]], env)
       end
       return env[-1][expr[1]]
     when :IDENTIFIER
@@ -379,6 +419,15 @@ def interpret_expr(expr, env)
           raise StandardError.new("Function #{expr[1].to_s} called with inappropriate argument #{obj.inspect}.")
         end
         return obj.chr
+      elsif expr[1] == :length
+        obj = interpret_expr(expr[2][0], env)
+        if expr[2].length != 1
+          raise StandardError.new("Function #{expr[1].to_s} called with an inappropriate amount of arguments.")
+        end
+        unless obj.is_a? Array or obj.is_a? String
+          raise StandardError.new("Function #{expr[1].to_s} called with inappropriate argument #{obj.inspect}.")
+        end
+        return obj.length
       end
       raise FunctionNotFoundException.new("Function #{expr[1].to_s} not found.")
   end
@@ -392,7 +441,7 @@ else
     print '> '
     begin
       x = interpret_stmts(parse(gets.chomp), env)
-      puts (x.is_a? Array) ? x.map {|x| (x.is_a? Array) ? x.inspect : x} : x
+      puts (x.is_a? Array) ? x.inspect : x
     rescue StandardError, SyntaxError => e
       $stderr.puts("Error: #{e.message.delete("\n")}")
     end

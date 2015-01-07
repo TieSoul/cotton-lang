@@ -9,6 +9,7 @@ class Cotton
         left ADDOP
         left BINOP
         left EQ
+        left IN
         right ASSIGNMENT
         nonassoc RETURN
     preclow
@@ -22,6 +23,7 @@ rule
             | OPERATOR FN operator '(' idlist ')' '{' stmtblock '}' { result = [:OPFUN, val[2], val[4], val[7]] }
             | CLASS IDENTIFIER '{' stmtblock '}' { result = [:CLASS, val[1], val[3]] }
             | WHILE expression '{' stmtblock '}' { result = [:WHILE, val[1], val[3]] }
+            | FOR IDENTIFIER IN expression '{' stmtblock '}' { result = [:FORIN, val[1], val[3], val[5]] }
             | IF expression '{' stmtblock '}' { result = [:IF, val[1], val[3]] }
             | IF expression '{' stmtblock '}' else { result = [:IFELSE, val[1], val[3], val[5]] }
             | expression T { result = [:EXPRESSION, val[0]] }
@@ -46,6 +48,7 @@ rule
         | expression ADDOP expression { result = [:BINOP, val[1], val[0], val[2]] }
         | expression MULTOP expression { result = [:BINOP, val[1], val[0], val[2]] }
         | expression POW expression { result = [:BINOP, val[1], val[0], val[2]] }
+        | expression IN expression { result = [:IN, val[0], val[2]] }
         | OP expression { result = [:UNOP, val[0], val[1]] }  = UNOP
         | ADDOP expression { result = [:UNOP, val[0], val[1]] } = UNOP
         | MULTOP expression { result = [:UNOP, val[0], val[1]] } = UNOP
